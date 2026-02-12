@@ -56,6 +56,5 @@ untuk menjalankan program tersebut :
     dan frontend hanya bisa di bagian auth login multirole dan logout.
     dikarenakan saya masih bekerja bug/error dan fitur chat untuk di bagian frontend nya belum selesai. saya minta maaf.
 
-    Demikian hasil pengerjaan saya. Terima Kasih.
-
+    Demikian hasil pengerjaan saya. Terima Kasih
 

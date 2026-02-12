@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: sociomile_mysql_dev
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: sociomile_dev
+      MYSQL_USER: sociomile_user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_dev_data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+    networks:
+      - sociomile_dev_network
+
+
+  redis:
+    image: redis:7-alpine
+    container_name: sociomile_redis_dev
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - sociomile_dev_network
+
+  backend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: sociomile_backend_dev
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: development
+      DB_HOST: mysql
+      DB_USER: sociomile_user
+      DB_PASSWORD: password
+      DB_NAME: sociomile_dev
+      DB_PORT: 3306
+      DB_DRIVER: mysql
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
+      REDIS_DB: 0
+      JWT_SECRET: dev_jwt_secret_key_123
+      JWT_REFRESH_SECRET: dev_refresh_secret_key_456
+      FRONTEND_URL: http://localhost:3000
+    volumes:
+      - .:/app
+      - /app/tmp
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - sociomile_dev_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: sociomile_phpmyadmin_dev
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+    depends_on:
+      - mysql
+    networks:
+      - sociomile_dev_network
+
+volumes:
+  mysql_dev_data:
+  redis_dev_data:
+
+networks:
+  sociomile_dev_network:
+    driver: bridge
